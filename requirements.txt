@@ -1,0 +1,11 @@
+﻿fastapi
+uvicorn[standard]
+jinja2
+sqlalchemy>=2.0
+psycopg[binary]
+python-dotenv
+pandas
+requests
+pycountry
+pytest
+httpx
