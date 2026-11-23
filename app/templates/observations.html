@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Observations - Global Health Data Platform{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Global Health Data Platform</h1>
+    <p>Server-side rendered indicator explorer</p>
+</header>
+
+<section>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <form method="post" action="/actions/extract" style="margin: 0;">
+            <button type="submit" class="secondary">Extract fresh data from sources</button>
+        </form>
+        <form method="post" action="/actions/load" style="margin: 0;">
+            <button type="submit">Transform &amp; load data from local JSON/CSV files</button>
+        </form>
+    </div>
+</section>
+
+<section>
+    <form method="get" action="/">
+        <div class="grid">
+            <label>
+                Country
+                <select name="country">
+                    <option value="">All countries</option>
+                    {% for option in options.countries %}
+                    <option value="{{ option.value }}" {% if option.value == criteria.country_iso3 %}selected{% endif %}>
+                        {{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Indicator
+                <select name="indicator">
+                    <option value="">All indicators</option>
+                    {% for option in options.indicators %}
+                    <option value="{{ option.value }}" {% if option.value == criteria.indicator_code %}selected{% endif %}>
+                        {{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Region
+                <select name="region">
+                    <option value="">All regions</option>
+                    {% for option in options.regions %}
+                    <option value="{{ option.value }}" {% if option.value == criteria.region %}selected{% endif %}>
+                        {{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="grid">
+            <label>
+                Year from
+                <input type="number" name="year_from" placeholder="2000"
+                       value="{{ criteria.year_from if criteria.year_from is not none else '' }}">
+            </label>
+
+            <label>
+                Year to
+                <input type="number" name="year_to" placeholder="2024"
+                       value="{{ criteria.year_to if criteria.year_to is not none else '' }}">
+            </label>
+
+            <div style="display: flex; align-items: end; gap: 0.5rem; margin-bottom: var(--pico-spacing);">
+                <button type="submit">Apply filters</button>
+                <a href="/" role="button" class="secondary outline">Reset</a>
+            </div>
+        </div>
+    </form>
+</section>
+
+<section>
+    <p><strong>{{ observations.total_items }}</strong> rows &middot; page <strong>{{ observations.number }}</strong> of <strong>{{ observations.total_pages }}</strong></p>
+
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Indicator</th>
+                    <th>Year</th>
+                    <th>Sex</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in observations.items %}
+                <tr>
+                    <td>{{ item.country_name }} ({{ item.country_iso3 }})</td>
+                    <td>{{ item.indicator_name }}</td>
+                    <td>{{ item.year }}</td>
+                    <td>{{ item.sex.value }}</td>
+                    <td>{{ "%.2f"|format(item.value) if item.value is not none else "-" }}</td>
+                    <td>{{ item.unit or "" }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">No data matches these filters.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
+    <nav aria-label="Pagination">
+        <ul>
+            <li>
+                {% if previous_url %}
+                <a href="{{ previous_url }}" role="button" class="secondary">Previous</a>
+                {% endif %}
+            </li>
+        </ul>
+        <ul>
+            <li>
+                {% if next_url %}
+                <a href="{{ next_url }}" role="button">Next</a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+</section>
+{% endblock %}

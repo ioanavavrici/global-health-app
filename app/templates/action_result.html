@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} result - Global Health Data Platform{% endblock %}
+
+{% block content %}
+<header>
+    <h1>{{ action }} complete</h1>
+    <p>{{ description }}</p>
+</header>
+
+<figure>
+    <table>
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>Item</th>
+                <th>Status</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td>{{ r.source }}</td>
+                <td>{{ r.item }}</td>
+                <td>{{ r.status.value }}</td>
+                <td>{{ r.detail }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No steps were run.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</figure>
+
+<p><a href="/" role="button">Back to observations</a></p>
+{% endblock %}
