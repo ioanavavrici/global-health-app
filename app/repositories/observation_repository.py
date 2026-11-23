@@ -20,6 +20,8 @@ def _conditions(criteria: ObservationCriteria) -> list[ColumnElement[bool]]:
         conditions.append(Indicator.code == criteria.indicator_code)
     if criteria.region is not None:
         conditions.append(Country.region == criteria.region)
+    if criteria.sex is not None:
+        conditions.append(Observation.sex == criteria.sex.value)
     if criteria.year_from is not None:
         conditions.append(Observation.year >= criteria.year_from)
     if criteria.year_to is not None:

@@ -85,3 +85,12 @@ def test_get_filter_options() -> None:
     assert opts.countries == [Option("ROU", "Romania (ROU)")]
     assert len(opts.indicators) == 1
     assert len(opts.regions) == 1
+
+
+def test_get_page_passes_sex_and_options_include_sexes() -> None:
+    repo = FakeRepository(total_items=2)
+    service = ObservationService(repo, page_size=4)
+    criteria = ObservationCriteria(sex=Sex.MALE)
+    service.get_page(criteria, 1)
+    assert repo.find_calls == [(criteria, 4, 0)]
+    assert [o.value for o in service.get_filter_options().sexes] == ["BTSX", "MLE", "FMLE"]

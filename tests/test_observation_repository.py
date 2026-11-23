@@ -36,3 +36,12 @@ def test_list_filter_options(db_session) -> None:
         "Europe & Central Asia",
         "Latin America & Caribbean",
     ]
+
+
+def test_filter_by_sex_returns_only_that_sex(db_session) -> None:
+    repo = ObservationRepository(db_session)
+    criteria = ObservationCriteria(country_iso3="ROU", sex=Sex.MALE)
+    items = repo.find(criteria, limit=10, offset=0)
+    assert len(items) == 1
+    assert items[0].sex == Sex.MALE
+    assert items[0].country_iso3 == "ROU"

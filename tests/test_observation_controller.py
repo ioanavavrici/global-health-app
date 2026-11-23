@@ -20,6 +20,7 @@ class FakeObservationService:
             countries=[Option("ROU", "Romania (ROU)")],
             indicators=[Option("WHOSIS_000001", "Life expectancy (WHOSIS_000001)")],
             regions=[Option("Europe & Central Asia", "Europe & Central Asia")],
+            sexes=[Option("BTSX", "BTSX"), Option("MLE", "MLE"), Option("FMLE", "FMLE")],
         )
 
 
@@ -86,3 +87,38 @@ def test_template_escapes_html_in_values(client) -> None:
     resp = client.get("/")
     assert "<script>alert(1)</script>" not in resp.text
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in resp.text
+
+
+def test_show_observations_filters_by_sex_and_ignores_unknown(client) -> None:
+    page = ObservationPage(
+        items=[
+            ObservationListItem(
+                country_name="Romania",
+                country_iso3="ROU",
+                region="Europe & Central Asia",
+                indicator_code="WHOSIS_000001",
+                indicator_name="Life expectancy at birth",
+                unit="years",
+                year=2021,
+                sex=Sex.MALE,
+                value=Decimal("69.10"),
+            )
+        ],
+        number=1,
+        size=4,
+        total_items=1,
+    )
+    fake = FakeObservationService(page)
+    app.dependency_overrides[get_observation_service] = lambda: fake
+
+    resp = client.get("/?sex=MLE&country=ROU")
+    assert resp.status_code == 200
+    assert fake.calls[-1] == (
+        ObservationCriteria(country_iso3="ROU", sex=Sex.MALE),
+        1,
+    )
+    assert "<strong>1</strong> rows" in resp.text
+
+    resp_bad = client.get("/?sex=INVALID")
+    assert resp_bad.status_code == 200
+    assert fake.calls[-1] == (ObservationCriteria(sex=None), 1)

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.controllers.form_fields import blank_to_none, to_int_or_none
+from app.controllers.form_fields import blank_to_none, to_int_or_none, to_sex_or_none
 from app.dependencies import get_observation_service
 from app.domain import ObservationCriteria
 from app.services.observation_service import ObservationService
@@ -18,6 +18,7 @@ def observation_criteria(
     country: str | None = None,
     indicator: str | None = None,
     region: str | None = None,
+    sex: str | None = None,
     year_from: str | None = None,
     year_to: str | None = None,
 ) -> ObservationCriteria:
@@ -26,6 +27,7 @@ def observation_criteria(
         country_iso3=blank_to_none(country),
         indicator_code=blank_to_none(indicator),
         region=blank_to_none(region),
+        sex=to_sex_or_none(sex),
         year_from=to_int_or_none(year_from),
         year_to=to_int_or_none(year_to),
     )

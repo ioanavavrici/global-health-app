@@ -10,6 +10,7 @@ class ObservationCriteria:
     country_iso3: str | None = None
     indicator_code: str | None = None
     region: str | None = None
+    sex: Sex | None = None
     year_from: int | None = None
     year_to: int | None = None
 
@@ -44,3 +45,4 @@ class FilterOptions:
     countries: list[Option]
     indicators: list[Option]
     regions: list[Option]
+    sexes: list[Option]

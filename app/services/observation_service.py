@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import math
-from app.domain import FilterOptions, ObservationCriteria, ObservationListItem
+from app.domain import FilterOptions, ObservationCriteria, ObservationListItem, Option
+from app.models import Sex
 from app.repositories.observation_repository import ObservationRepository
 
 DEFAULT_PAGE_SIZE = 25
@@ -64,4 +65,5 @@ class ObservationService:
             countries=self._repository.list_countries(),
             indicators=self._repository.list_indicators(),
             regions=self._repository.list_regions(),
+            sexes=[Option(value=s.value, label=s.value) for s in Sex],
         )
