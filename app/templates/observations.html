@@ -3,26 +3,53 @@
 {% block title %}Observations - Global Health Data Platform{% endblock %}
 
 {% block content %}
-<header>
-    <h1>Global Health Data Platform</h1>
-    <p>Server-side rendered indicator explorer</p>
+<header class="topbar">
+    <a href="/" class="brand">
+        <div class="brand-logo">GH</div>
+        <div>
+            <div class="brand-title">Global Health Data Platform</div>
+            <div class="brand-sub">World Bank &middot; WHO GHO &middot; Our World in Data</div>
+        </div>
+    </a>
+    <div class="actions-bar">
+        <form method="post" action="/actions/extract">
+            <button type="submit" class="btn btn-soft">Extract fresh data from sources</button>
+        </form>
+        <form method="post" action="/actions/load">
+            <button type="submit" class="btn btn-primary">Transform &amp; load data from local JSON/CSV files</button>
+        </form>
+    </div>
 </header>
 
-<section>
-    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
-        <form method="post" action="/actions/extract" style="margin: 0;">
-            <button type="submit" class="secondary">Extract fresh data from sources</button>
-        </form>
-        <form method="post" action="/actions/load" style="margin: 0;">
-            <button type="submit">Transform &amp; load data from local JSON/CSV files</button>
-        </form>
+<section class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-violet">&#9673;</div>
+        <div>
+            <div class="stat-label">Matching Observations</div>
+            <div class="stat-value">{{ observations.total_items }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">&#9776;</div>
+        <div>
+            <div class="stat-label">Current Page</div>
+            <div class="stat-value">{{ observations.number }} / {{ observations.total_pages }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-mint">&#10003;</div>
+        <div>
+            <div class="stat-label">Available Countries</div>
+            <div class="stat-value">{{ options.countries|length }}</div>
+        </div>
     </div>
 </section>
 
-<section>
-    <form method="get" action="/">
-        <div class="grid">
-            <label>
+<div class="workspace">
+    <aside class="card" style="margin-bottom: 0;">
+        <h2 class="card-title">Filter indicators</h2>
+        <form method="get" action="/" class="sidebar-filters">
+            <label class="field">
                 Country
                 <select name="country">
                     <option value="">All countries</option>
@@ -34,7 +61,7 @@
                 </select>
             </label>
 
-            <label>
+            <label class="field">
                 Indicator
                 <select name="indicator">
                     <option value="">All indicators</option>
@@ -46,7 +73,7 @@
                 </select>
             </label>
 
-            <label>
+            <label class="field">
                 Region
                 <select name="region">
                     <option value="">All regions</option>
@@ -57,78 +84,92 @@
                     {% endfor %}
                 </select>
             </label>
-        </div>
 
-        <div class="grid">
-            <label>
-                Year from
-                <input type="number" name="year_from" placeholder="2000"
-                       value="{{ criteria.year_from if criteria.year_from is not none else '' }}">
+            <label class="field">
+                Sex
+                <select name="sex">
+                    <option value="">All sexes</option>
+                    {% for option in options.sexes %}
+                    <option value="{{ option.value }}" {% if criteria.sex and option.value == criteria.sex.value %}selected{% endif %}>
+                        {{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
             </label>
 
-            <label>
-                Year to
-                <input type="number" name="year_to" placeholder="2024"
-                       value="{{ criteria.year_to if criteria.year_to is not none else '' }}">
-            </label>
+            <div class="year-pair">
+                <label class="field">
+                    Year from
+                    <input type="number" name="year_from" placeholder="2000"
+                           value="{{ criteria.year_from if criteria.year_from is not none else '' }}">
+                </label>
 
-            <div style="display: flex; align-items: end; gap: 0.5rem; margin-bottom: var(--pico-spacing);">
-                <button type="submit">Apply filters</button>
-                <a href="/" role="button" class="secondary outline">Reset</a>
+                <label class="field">
+                    Year to
+                    <input type="number" name="year_to" placeholder="2024"
+                           value="{{ criteria.year_to if criteria.year_to is not none else '' }}">
+                </label>
             </div>
+
+            <div class="filter-buttons" style="margin-top: 0.25rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Apply filters</button>
+                <a href="/" class="btn btn-ghost">Reset</a>
+            </div>
+        </form>
+    </aside>
+
+    <section class="card" style="margin-bottom: 0;">
+        <div class="table-header">
+            <h2 class="card-title" style="margin: 0;">Observations</h2>
+            <p class="table-meta"><strong>{{ observations.total_items }}</strong> rows &middot; page <strong>{{ observations.number }}</strong> of <strong>{{ observations.total_pages }}</strong></p>
         </div>
-    </form>
-</section>
 
-<section>
-    <p><strong>{{ observations.total_items }}</strong> rows &middot; page <strong>{{ observations.number }}</strong> of <strong>{{ observations.total_pages }}</strong></p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Indicator</th>
+                        <th>Year</th>
+                        <th>Sex</th>
+                        <th class="num">Value</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in observations.items %}
+                    <tr>
+                        <td><strong>{{ item.country_name }} ({{ item.country_iso3 }})</strong></td>
+                        <td>{{ item.indicator_name }}</td>
+                        <td>{{ item.year }}</td>
+                        <td>
+                            <span class="pill pill-{{ item.sex.value|lower }}">{{ item.sex.value }}</span>
+                        </td>
+                        <td class="num">{{ "%.2f"|format(item.value) if item.value is not none else "-" }}</td>
+                        <td style="color: var(--muted);">{{ item.unit or "" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="empty-state">No data matches these filters.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <figure>
-        <table>
-            <thead>
-                <tr>
-                    <th>Country</th>
-                    <th>Indicator</th>
-                    <th>Year</th>
-                    <th>Sex</th>
-                    <th>Value</th>
-                    <th>Unit</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in observations.items %}
-                <tr>
-                    <td>{{ item.country_name }} ({{ item.country_iso3 }})</td>
-                    <td>{{ item.indicator_name }}</td>
-                    <td>{{ item.year }}</td>
-                    <td>{{ item.sex.value }}</td>
-                    <td>{{ "%.2f"|format(item.value) if item.value is not none else "-" }}</td>
-                    <td>{{ item.unit or "" }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6">No data matches these filters.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </figure>
-
-    <nav aria-label="Pagination">
-        <ul>
-            <li>
+        <nav class="pagination" aria-label="Pagination">
+            <div>
                 {% if previous_url %}
-                <a href="{{ previous_url }}" role="button" class="secondary">Previous</a>
+                <a href="{{ previous_url }}" class="btn btn-ghost">&larr; Previous</a>
                 {% endif %}
-            </li>
-        </ul>
-        <ul>
-            <li>
+            </div>
+            <span class="table-meta">Page <strong>{{ observations.number }}</strong> of <strong>{{ observations.total_pages }}</strong> ({{ observations.total_items }} rows)</span>
+            <div>
                 {% if next_url %}
-                <a href="{{ next_url }}" role="button">Next</a>
+                <a href="{{ next_url }}" class="btn btn-primary">Next &rarr;</a>
                 {% endif %}
-            </li>
-        </ul>
-    </nav>
-</section>
+            </div>
+        </nav>
+    </section>
+</div>
 {% endblock %}

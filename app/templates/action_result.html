@@ -3,37 +3,50 @@
 {% block title %}{{ action }} result - Global Health Data Platform{% endblock %}
 
 {% block content %}
-<header>
-    <h1>{{ action }} complete</h1>
-    <p>{{ description }}</p>
+<header class="topbar">
+    <a href="/" class="brand">
+        <div class="brand-logo">GH</div>
+        <div>
+            <div class="brand-title">Global Health Data Platform</div>
+            <div class="brand-sub">Pipeline execution summary</div>
+        </div>
+    </a>
+    <div class="actions-bar">
+        <a href="/" class="btn btn-primary">&larr; Back to observations</a>
+    </div>
 </header>
 
-<figure>
-    <table>
-        <thead>
-            <tr>
-                <th>Source</th>
-                <th>Item</th>
-                <th>Status</th>
-                <th>Detail</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for r in results %}
-            <tr>
-                <td>{{ r.source }}</td>
-                <td>{{ r.item }}</td>
-                <td>{{ r.status.value }}</td>
-                <td>{{ r.detail }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4">No steps were run.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</figure>
+<section class="card">
+    <h1 style="margin: 0 0 0.35rem; font-size: 1.4rem;">{{ action }} complete</h1>
+    <p style="margin: 0 0 1.2rem; color: var(--muted);">{{ description }}</p>
 
-<p><a href="/" role="button">Back to observations</a></p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Item</th>
+                    <th>Status</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td><strong>{{ r.source }}</strong></td>
+                    <td>{{ r.item }}</td>
+                    <td>
+                        <span class="pill pill-{{ r.status.value }}">{{ r.status.value|upper }}</span>
+                    </td>
+                    <td style="color: var(--muted);">{{ r.detail }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="empty-state">No steps were run.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}
