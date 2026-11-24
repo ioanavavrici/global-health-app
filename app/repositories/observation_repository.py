@@ -78,10 +78,11 @@ class ObservationRepository:
         )
         return self._session.scalar(query) or 0
 
-    def list_countries(self) -> list[Option]:
-        rows = self._session.execute(
-            select(Country.iso3, Country.name).order_by(Country.name)
-        ).all()
+    def list_countries(self, region: str | None = None) -> list[Option]:
+        query = select(Country.iso3, Country.name)
+        if region is not None:
+            query = query.where(Country.region == region)
+        rows = self._session.execute(query.order_by(Country.name)).all()
         return [Option(value=iso3, label=f"{name} ({iso3})") for iso3, name in rows]
 
     def list_indicators(self) -> list[Option]:

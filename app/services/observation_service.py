@@ -67,3 +67,12 @@ class ObservationService:
             regions=self._repository.list_regions(),
             sexes=[Option(value=s.value, label=s.value) for s in Sex],
         )
+
+    def list_countries(self, region: str | None = None) -> list[Option]:
+        return self._repository.list_countries(region)
+
+    def list_indicators(self) -> list[Option]:
+        return self._repository.list_indicators()
+
+    def list_regions(self) -> list[Option]:
+        return self._repository.list_regions()
