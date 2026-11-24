@@ -1,3 +1,5 @@
+from app.repositories.period_average_repository import PeriodAverageRepository
+from app.services.period_average_service import PeriodAverageService
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -15,3 +17,9 @@ def get_observation_service(
 
 def get_etl_service() -> EtlService:
     return EtlService()
+
+
+def get_period_average_service(
+    session: Annotated[Session, Depends(get_db)],
+) -> PeriodAverageService:
+    return PeriodAverageService(PeriodAverageRepository(session))
