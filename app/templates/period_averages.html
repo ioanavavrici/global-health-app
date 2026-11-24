@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Averages per period - Global Health Data Platform{% endblock %}
+
+{% block content %}
+<header class="topbar">
+    <a href="/" class="brand">
+        <div class="brand-logo">GH</div>
+        <div>
+            <div class="brand-title">Global Health Data Platform</div>
+            <div class="brand-sub">Client-Side Rendering &middot; REST API</div>
+        </div>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+        <a href="/" class="nav-link">Observations (SSR)</a>
+        <a href="/period-averages" class="nav-link active">Averages per period (CSR)</a>
+        <a href="{{ api_docs_url }}" class="nav-link">API Docs</a>
+    </nav>
+</header>
+
+<section class="card">
+    <h2 class="card-title">Dynamic Filters (No Page Reload)</h2>
+    <div class="filter-grid">
+        <label class="field">
+            Indicator
+            <select id="indicator" data-first-year="{{ first_year }}" data-last-year="{{ last_year }}"></select>
+        </label>
+
+        <label class="field">
+            Region
+            <select id="region"></select>
+        </label>
+
+        <label class="field">
+            Sex
+            <select id="sex">
+                <option value="BTSX" selected>Both sexes (BTSX)</option>
+                <option value="MLE">Male (MLE)</option>
+                <option value="FMLE">Female (FMLE)</option>
+            </select>
+        </label>
+
+        <label class="field">
+            Period Length
+            <select id="period-years">
+                <option value="3">3 years</option>
+                <option value="5" selected>5 years</option>
+                <option value="10">10 years</option>
+            </select>
+        </label>
+
+        <div class="field" style="grid-column: span 2;">
+            Countries (max {{ max_countries }})
+            <details class="dropdown">
+                <summary id="country-summary">Choose countries</summary>
+                <ul id="country-list"></ul>
+            </details>
+        </div>
+    </div>
+</section>
+
+<p id="status" role="status" aria-live="polite" class="status-banner">Loading...</p>
+
+<section class="card">
+    <h2 class="card-title">Period Averages Trend &amp; Comparison</h2>
+    <div class="chart-box">
+        <canvas id="averages-chart" role="img" aria-label="Line chart of the averages per period"></canvas>
+    </div>
+
+    <div class="table-wrap">
+        <table id="averages-table"></table>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script type="module" src="{{ url_for('static', path='js/period-averages-page.js') }}"></script>
+{% endblock %}
